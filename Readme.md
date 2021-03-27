@@ -19,6 +19,7 @@
     <a href="#overview">Overview</a> •
     <a href="#security-considerations">Security Considerations</a> •
     <a href="#example">Example</a> •
+    <a href="#documentation">Documentation</a> • 
     <a href="#credit">Credit</a> •
     <a href="#license">License</a>
   </p>
