@@ -29,7 +29,7 @@ module.exports = class RPC {
     this.encrypted = encrypted;
     this.encrypt = encrypt;
     this.decrypt = decrypt;
-    
+
     this.B = B;
 
     this.socket = dgram.createSocket("udp4");

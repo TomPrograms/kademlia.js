@@ -93,7 +93,7 @@ class MemoryStorageAdapter {
  * @param {Boolean} [options.encrypted=false] - Whether communicates between nodes are encrypted. If true, options.encrypt and options.decrypt must also be passed.
  * @param {Function} [options.encrypt] - Sync function to encrypt outgoing data (only used if options.encrypted==true).
  * @param {Function} [options.decrypt] - Sync function to decrypt incoming data (only used if options.encrypted==true). Should return null if data couldn't be decrypted.
- * 
+ *
  * @param {Integer} [options.ttl=86400000] - The maximum time (in millseconds) a value has to live before expiring.
  * @param {Boolean} [option.scalettl=true] - If true, the ttl of keys is inversely proportional to the number of nodes in the storer's routing table closer to the key than the storer.
  * @param {Function} [options.scalettlFunction] - Alternative function to scale ttl. Must accept number of nodes in the storer's routing table closer to the key than the storer and the k-value of the storer, and return a ttl in millseconds.
@@ -108,9 +108,7 @@ module.exports = class Kademlia {
 
     this.B = options.B || 256;
     if (this.B % 8 !== 0) throw new Error("B must be a multiple of 8.");
-    this.hashFunction = utils.createHashFunction(
-      options.hash || "sha3-256"
-    );
+    this.hashFunction = utils.createHashFunction(options.hash || "sha3-256");
 
     this.a = options.a || 3;
     this.k = options.k || 20;
