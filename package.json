@@ -1,0 +1,20 @@
+{
+  "name": "kademlia.js",
+  "version": "1.0.0",
+  "description": "A complete Javascript implementation of the Kademlia distributed hash table for Node.js.",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --write **/*.{js,md}"
+  },
+  "files": [
+    "index.js",
+    "src/",
+    "docs/",
+    "Readme.md",
+    "Changelog.md",
+    "LICENSE"
+  ],
+  "author": "Tom",
+  "license": "MIT",
+  "dependencies": {}
+}
