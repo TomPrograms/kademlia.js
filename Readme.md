@@ -18,6 +18,7 @@
   <p align="center">
     <a href="#overview">Overview</a> •
     <a href="#security-considerations">Security Considerations</a> •
+    <a href="#installation">Installation</a> •
     <a href="#example">Example</a> •
     <a href="#documentation">Documentation</a> • 
     <a href="#credit">Credit</a> •
@@ -64,7 +65,7 @@ S/Kademlia is a variation of Kademlia, which improves reliability and security o
 You can install kademlia.js through NPM, with the command:
 
 ```
-$ npm i stormdb
+$ npm i kademlia.js
 ```
 
 ## Example
