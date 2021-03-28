@@ -29,7 +29,7 @@
 
 Kademlia.js is a Javascript implementation of the distributed hash table Kademlia, originally designed in 2002 by Petar Maymounkov and David Mazières. A distributed hash table (DHT) is a key-value data store which can operate distributed across multiple nodes (or computers) on a network. The Kademlia DHT is a peer-to-peer network, and completley decentralized. A Kademlia network in which anyone can participate is a public network, a Kademlia network in which only certain people can participate is a private network.
 
-Nodes on the network share network-wide constants <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/k.svg">, <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/alpha.svg"> and <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg">. Each node also has an <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/id.svg"> of length <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg"> bits. <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/k.svg"> defines the amount of nodes a Kademlia instance can keep in each bucket in it's routing table, and the number of nodes each data should be replicated across when setting it to the network. <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/alpha.svg"> defines the number of simultaneous queries a node performs in the lookup stage. <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg"> defines the length in bits of node ids and data keys. As requiring keys to be exactly <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg"> bits long is inconvenient, data keys are hashed with a hashing algorithm with digest size <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg"> bits. The original paper and many implementations of Kademlia use SHA-1 as the hashing algorithm, and a <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg"> value of 160, however by default this implementation uses the SHA-3-256 with a <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg"> value of 256, to increase the key space and address security concerns with the SHA-1 hashing algorithm. The hash function must be the same across all nodes in the network. 
+Nodes on the network share network-wide constants <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/k.svg">, <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/alpha.svg"> and <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg">. Each node also has an <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/id.svg"> of length <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg"> bits. <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/k.svg"> defines the amount of nodes a Kademlia instance can keep in each bucket in it's routing table, and the number of nodes each data should be replicated across when setting it to the network. <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/alpha.svg"> defines the number of simultaneous queries a node performs in the lookup stage. <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg"> defines the length in bits of node ids and data keys. As requiring keys to be exactly <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg"> bits long is inconvenient, data keys are hashed with a hashing algorithm with digest size <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg"> bits. The original paper and many implementations of Kademlia use SHA-1 as the hashing algorithm, and a <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg"> value of 160, however by default this implementation uses the SHA-3-256 with a <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/B.svg"> value of 256, to increase the key space and address security concerns with the SHA-1 hashing algorithm. The hash function must be the same across all nodes in the network.
 
 Kademlia can efficiently fetch and set data to and from the network, with set and get operations scaling with <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/bigONotation.svg">, where <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/n.svg"> is the number of nodes connected to the network. Kademlia uses a recursive algorithm, with <img src="https://raw.githubusercontent.com/TomPrograms/kademlia.js/master/docs/images/alpha.svg"> maximum concurrent queries, to traverse the network to find the nodes with the smallest distance between the key of the data and each node's id (where the distance between two IDs is defined as the XOR of two IDs), and then uses those nodes to either get data from or set data onto the network. After setting data to the network, by default we also store data onto the closest node that we queried that didn't return a value (caching).
 
@@ -59,13 +59,23 @@ These problems can largely be offset by using authenticatable data, bootstrappin
 S/Kademlia is a variation of Kademlia, which improves reliability and security of the Kademlia network, but at the price of requiring extra computational recourses and extra network traffic. An implementation of S/Kademlia can be found here.
 -->
 
+## Installation
+
+You can install kademlia.js through NPM, with the command:
+
+```
+$ npm i stormdb
+```
+
 ## Example
 
 > Example: Create a Kademlia node, set data on the network, and then fetch it again.
 
 ```js
+const Kademlia = require("kademlia.js");
+
 // create a Kademlia node
-let node = new KademliaDHT(5533);
+let node = new Kademlia(5533);
 
 // bootstrap the new node onto the network using the details of a node already in the network
 await node.bootstrap({
@@ -82,6 +92,12 @@ assert(fetchedData === "test-data");
 ```
 
 ## Documentation
+
+You can import the library after installing it like so:
+
+```
+const Kademlia = require("kademlia.js");
+```
 
 Creating a new Kademlia node, providing the port for the Kademlia node, with an optional dictionary containing options for the node:
 
@@ -101,7 +117,7 @@ Creating a new Kademlia node, providing the port for the Kademlia node, with an 
  * @param {Boolean} [options.encrypted=false] - Whether communicates between nodes are encrypted. If true, options.encrypt and options.decrypt must also be passed.
  * @param {Function} [options.encrypt] - Sync function to encrypt outgoing data (only used if options.encrypted==true).
  * @param {Function} [options.decrypt] - Sync function to decrypt incoming data (only used if options.encrypted==true). Should return null if data couldn't be decrypted.
- * 
+ *
  * @param {Integer} [options.ttl=86400000] - The maximum time (in millseconds) a value has to live before expiring.
  * @param {Boolean} [option.scalettl=true] - If true, the ttl of keys is inversely proportional to the number of nodes in the storer's routing table closer to the key than the storer.
  * @param {Function} [options.scalettlFunction] - Alternative function to scale ttl. Must accept number of nodes in the storer's routing table closer to the key than the storer and the k-value of the storer, and return a ttl in millseconds.
@@ -151,7 +167,7 @@ let node = new Kademlia(5533, {
 });
 ```
 
-It may be desirable for data to be flushed out of the system if not being republished by a user. To achieve this you should disable node's republishing values they're storing and caching. In this scenario it may also be useful to disable ttl scaling. 
+It may be desirable for data to be flushed out of the system if not being republished by a user. To achieve this you should disable node's republishing values they're storing and caching. In this scenario it may also be useful to disable ttl scaling.
 
 ```js
 let node = new Kademlia(5533, {
