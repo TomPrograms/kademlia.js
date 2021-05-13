@@ -1,6 +1,6 @@
 {
   "name": "kademlia.js",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A complete Javascript implementation of the Kademlia distributed hash table for Node.js.",
   "main": "index.js",
   "scripts": {

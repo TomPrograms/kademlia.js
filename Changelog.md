@@ -1,3 +1,14 @@
+# 1.1.0 - 2021/05/13
+
+## Added
+
+- Ability for custom data serialization when transmitting data over the network.
+- Ability for custom data storage techniques.
+
+## Removed
+
+- `.resume()`, `.shutdown()` and `.isRunning` from nodes.
+
 # 1.0.1 - 2021/03/27
 
 ## Fixed
