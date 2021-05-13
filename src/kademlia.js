@@ -53,6 +53,10 @@ class MemoryStorageAdapter {
  * @param {Integer} port - Port to bind Kademlia node to. Must be valid, unbound port number.
  * @param {Object} [options] - Options dictionary.
  *
+ * @param {Function} [storeFunction=] - Function which determines how values are stored locally. Function receives new data to be stored under a key, data currently being stored under a key and must return what should be stored under the key.
+ * @param {Function} [serializeData=JSON.strinify] - Function which deserializes data for transmission over the network. Receives unserialized data and must return serialized data.
+ * @param {Function} [deserializeData=JSON.parse] - Function which deserializes data received over the network. Receives serialized data and must return deserialized data.
+ *
  * @param {String} [options.id] - Hex string of node ID to use. If none provided, defaults to random hex string.
  * @param {Integer} [options.k=20] - K-Value to use for the node. Must be integer greater or equal to 1.
  * @param {Integer} [options.alpha=3] - Alpha value to use for the node. Must be integer greater or equal to 1.
@@ -79,6 +83,24 @@ module.exports = class Kademlia {
     this.B = options.B || 256;
     if (this.B % 8 !== 0) throw new Error("B must be a multiple of 8.");
     this.hashFunction = utils.createHashFunction(options.hash || "sha3-256");
+
+    this.storeFunction =
+      options.storeFunction ||
+      function (newData, currentData) {
+        return newData;
+      };
+
+    this.serializeData =
+      options.serializeDatabaseData ||
+      function (databaseValue) {
+        return JSON.stringify(databaseValue);
+      };
+
+    this.deserializeData =
+      options.deserializeDatabaseData ||
+      function (data) {
+        return JSON.parse(data);
+      };
 
     this.a = options.a || 3;
     this.k = options.k || 20;
@@ -153,7 +175,12 @@ module.exports = class Kademlia {
             );
           }
         }
-        this.storageAdapter.set(message.key, message.value, datattl);
+        let currentData = this.storageAdapter.get(message.key);
+        let dataToStore = this.storeFunction(
+          this.deserializeData(message.value),
+          currentData
+        );
+        this.storageAdapter.set(message.key, dataToStore, datattl);
         replyFunction("SUCCESS");
         break;
 
@@ -167,7 +194,7 @@ module.exports = class Kademlia {
 
       case "FIND_VALUE":
         let databaseValue = this.storageAdapter.get(message.value);
-        if (databaseValue) replyFunction(databaseValue);
+        if (databaseValue) replyFunction(this.serializeData(databaseValue));
         else
           replyFunction(
             this.routingTable.closestNodes(
@@ -223,13 +250,15 @@ module.exports = class Kademlia {
     return await nodeLookup.execute();
   }
 
-  get(key) {
+  async get(key) {
     let keyId = new ID(this.hashFunction(key));
     let valueLookup = new ValueLookup(this, keyId, this.cache);
-    return valueLookup.execute();
+    let returnedValue = await valueLookup.execute();
+    return this.deserializeData(returnedValue);
   }
 
   async setOntoNetwork(key, value) {
+    value = this.serializeData(value);
     if (!(key instanceof ID)) key = new ID(key);
     let closest = await this.nodeLookup(key);
 

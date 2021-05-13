@@ -108,6 +108,10 @@ Creating a new Kademlia node, providing the port for the Kademlia node, with an 
  * @param {Integer} port - Port to bind Kademlia node to. Must be valid, unbound port number.
  * @param {Object} [options] - Options dictionary.
  *
+ * @param {Function} [storeFunction=] - Function which determines how values are stored locally. Function receives new data to be stored under a key, data currently being stored under a key and must return what should be stored under the key.
+ * @param {Function} [serializeData=JSON.strinify] - Function which deserializes data for transmission over the network. Receives unserialized data and must return serialized data.
+ * @param {Function} [deserializeData=JSON.parse] - Function which deserializes data received over the network. Receives serialized data and must return deserialized data.
+ * 
  * @param {String} [options.id] - Hex string of node ID to use. If none provided, defaults to random hex string.
  * @param {Integer} [options.k=20] - K-Value to use for the node. Must be integer greater or equal to 1.
  * @param {Integer} [options.alpha=3] - Alpha value to use for the node. Must be integer greater or equal to 1.
@@ -158,6 +162,46 @@ let node = new Kademlia(5533, {
   hashFunction: "sha-1",
   B: 160,
 });
+```
+
+The data transmitted over UDP by Kademlia must be in string form, however it may be useful to be able to store more complex objects. Therefore we have a `serializeData` and `deserializeData`. `serializeData` is called whenever a Kademlia node needs to transmit data, and is passed the data that is to be transmitted, and must return the serialized form. `deserializeData` is called whenever data is received by Kademlia, is passed the received data and must return the deserialized data. By default `serializeData` is `JSON.stringify` and `deserializeData` is `JSON.parse`. These functions can be changed like so:
+
+```js
+let node = new Kademlia(5533, {
+  serializeData: (dataToSerialize) => {
+    ...
+    return serializedData;
+  } 
+  deserializeData: (dataToDeserialize) => {
+    ...
+    return deserializedData;
+  }
+});
+```
+
+The way Kademlia stores values locally can also be changed. By default when Kademlia receives a store request, the data sent to be stored is stored under the specified key in the database, replacing any data already under that key. If a different functionality is required, such as adding the new value to a list, that can be done with the `storeFunction`. When Kademlia receives a store request the `storeFunction` is passed the new data to be stored under the key and the data currently stored in the database under the key, and must return the value that should be stored in the database.
+
+The following example maintains a list under the key, and appends new values to the list:
+
+```js
+let node = new Kademlia(5533, {
+  storeFunction: function (newData, oldData) {
+    if (oldData === undefined) {
+      if (Array.isArray(newData)) {
+        return newData;
+      } else {
+        return [newData];
+      }
+    } else {
+      if (Array.isArray(newData)) {
+        return newData;
+      } else {
+        oldData.push(newData);
+        return oldData;
+      }
+    }
+  },
+})
 ```
 
 Lookups are generally pretty fast, however if the timeout value is large and many offline nodes are encountered during the lookup, this may slow down the lookups greatly. To decrease the effect of offline nodes on the lookup speed, the value of `timeout` can be lowered, however if `timeout` is two low, queries may expire before online nodes get a chance to respond to them.
