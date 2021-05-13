@@ -37,28 +37,6 @@ module.exports = class RPC {
     this.socket.bind(this.port);
   }
 
-  shutdown() {
-    return new Promise((resolve, reject) => {
-      this.acceptingMessages = false;
-      if (Object.keys(this.pending).length === 0) {
-        this.socket.close();
-        return resolve();
-      }
-
-      setTimeout(() => {
-        this.socket.close();
-        return resolve();
-      }, this.timeout);
-    });
-  }
-
-  resume() {
-    this.acceptingMessages = true;
-    this.socket = dgram.createSocket("udp4");
-    this.socket.on("message", this.handleMessage.bind(this));
-    this.socket.bind(this.port);
-  }
-
   handleMessage(data, networkInfo) {
     if (this.encrypted) data = this.decrypt(data);
 

@@ -46,36 +46,6 @@ class MemoryStorageAdapter {
   getValueKeyPairs() {
     return Object.entries(this.data);
   }
-
-  shutdown() {
-    for (let [key, value] of Object.entries(this.data)) {
-      clearTimeout(value.expireTimeout);
-      if (this.republish) clearInterval(value.republishFunction);
-    }
-  }
-
-  resume() {
-    for (let [key, value] of Object.entries(this.data)) {
-      if (Date.now() - value.ttl > value.timestamp) {
-        this.data[key] = undefined;
-      } else {
-        this.data[key] = {
-          value: value.value,
-          expireTimeout: setTimeout(() => {
-            this.remove(key);
-          }, value.ttl - (Date.now() - value.timestamp)),
-          timestamp: value.timestamp,
-          ttl: value.ttl,
-        };
-
-        if (this.republish) {
-          this.data[key].republishFunction = setInterval(() => {
-            this.kademlia.setOntoNetwork(key, value.value);
-          }, this.republishInterval);
-        }
-      }
-    }
-  }
 }
 
 /**
@@ -151,8 +121,6 @@ module.exports = class Kademlia {
       options.storageAdapter ||
       new MemoryStorageAdapter(this, this.republish, this.republishInterval);
     this.routingTable = new RoutingTable(this, this.k, this.id);
-
-    this.isRunning = true;
   }
 
   messageHandler(message, replyFunction) {
@@ -256,14 +224,12 @@ module.exports = class Kademlia {
   }
 
   get(key) {
-    if (!this.isRunning) throw new Error("Node is not running.");
     let keyId = new ID(this.hashFunction(key));
     let valueLookup = new ValueLookup(this, keyId, this.cache);
     return valueLookup.execute();
   }
 
   async setOntoNetwork(key, value) {
-    if (!this.isRunning) throw new Error("Node is not running.");
     if (!(key instanceof ID)) key = new ID(key);
     let closest = await this.nodeLookup(key);
 
@@ -290,23 +256,8 @@ module.exports = class Kademlia {
   }
 
   set(key, value) {
-    if (!this.isRunning) throw new Error("Node is not running.");
     let keyId = new ID(this.hashFunction(key));
     return this.setOntoNetwork(keyId, value);
-  }
-
-  async shutdown() {
-    if (this.isRunning === false) throw new Error("Already shutdown.");
-    this.isRunning = false;
-    this.storageAdapter.shutdown();
-    await this.rpc.shutdown();
-  }
-
-  resume() {
-    if (this.isRunning === true) throw new Error("Already running.");
-    this.isRunning = true;
-    this.storageAdapter.resume();
-    this.rpc.resume();
   }
 
   async bootstrap(target) {

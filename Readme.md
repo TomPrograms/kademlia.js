@@ -178,24 +178,6 @@ let node = new Kademlia(5533, {
 });
 ```
 
-You can shutdown without destroying a node like so. This will first wait for all outgoing queries to finish and then stop the node's operations:
-
-```js
-await node.shutdown();
-```
-
-You can resume a shutdown node's operations like so:
-
-```js
-node.resume();
-```
-
-You can check if a node is running like so:
-
-```js
-node.isRunning;
-```
-
 On private networks you may want to encrypt communications between Kademlia nodes. You can achieve this like this so:
 
 ```js
