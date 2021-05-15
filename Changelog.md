@@ -1,3 +1,9 @@
+# 1.1.1 - 2021/05/15
+
+## Fixed
+
+- Bug in lookup algorithm.
+
 # 1.1.0 - 2021/05/13
 
 ## Added
