@@ -95,7 +95,7 @@ class BaseLookup {
         : this.kademlia.a;
     let nodesToQuery = this.lookupTable.getUncontacted(numberToQuery);
 
-    this.lastClosestId === this.lookupTable.get(1)[0].id.hex;
+    this.lastClosestId = this.lookupTable.get(1)[0].id.hex;
 
     let queries = [];
     let responses = [];
